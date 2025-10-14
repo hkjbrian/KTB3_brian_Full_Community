@@ -1,5 +1,6 @@
 package com.community.domain.user.service;
 
+import com.community.domain.user.dto.response.SignInAvailableResponse;
 import com.community.global.exception.CustomException;
 import com.community.global.exception.ErrorCode;
 import com.community.domain.file.service.FileStorageService;
@@ -19,19 +20,20 @@ public class UserService {
     private final FileStorageService fileStorageService;
 
     public SignInResponse signIn(SignInRequest req) {
-        validateDuplicateUser(req);
+        validateDuplicateUser(req.getEmail(), req.getNickname());
         String imageUrl = saveProfileImage(req.getFile());
         Long savedId = userRepository.save(new User(req.getEmail(), req.getPassword(), req.getNickname(), imageUrl));
+
         return new SignInResponse(savedId);
     }
 
-    private void validateDuplicateUser(SignInRequest req) {
-        userRepository.findByEmail(req.getEmail())
+    private void validateDuplicateUser(String email, String nickname) {
+        userRepository.findByEmail(email)
                 .ifPresent(user -> {
                     throw new CustomException(ErrorCode.DUPLICATED_EMAIL);
                 });
 
-        userRepository.findByNickName(req.getNickname())
+        userRepository.findByNickname(nickname)
                 .ifPresent(user -> {
                     throw new CustomException(ErrorCode.DUPLICATED_NICKNAME);
                 });

@@ -49,13 +49,13 @@ public class UserRepositoryTest {
         Long id = repository.save(u);
 
         //when
-        u.updateNickname("newNickName");
+        u.updateNickname("newNickname");
         Long id2 = repository.save(u);
 
         //then
         assertEquals(id, id2);
         User updatedUser = repository.findById(id).orElseThrow();
-        assertEquals("newNickName", updatedUser.getNickname());
+        assertEquals("newNickname", updatedUser.getNickname());
     }
 
     @Test
@@ -78,13 +78,13 @@ public class UserRepositoryTest {
     }
 
     @Test
-    void findByNickName_FindsFirstMatch() {
+    void findByNickname_FindsFirstMatch() {
         //given
         repository.save(newUser("test1@email.com", "password","test1","imageURL1"));
         repository.save(newUser("test2@email.com", "password","test2","imageURL2"));
 
         //then
-        Optional<User> found = repository.findByNickName("test2");
+        Optional<User> found = repository.findByNickname("test2");
 
         //then
         assertTrue(found.isPresent());
@@ -103,7 +103,7 @@ public class UserRepositoryTest {
         //then
         assertTrue(repository.findById(id).isEmpty());
         assertTrue(repository.findByEmail("a@test.com").isEmpty());
-        assertTrue(repository.findByNickName("alice").isEmpty());
+        assertTrue(repository.findByNickname("alice").isEmpty());
     }
 
     @Test
