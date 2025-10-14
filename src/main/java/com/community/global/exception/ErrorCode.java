@@ -12,6 +12,7 @@ public enum ErrorCode {
     UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
     DUPLICATED_EMAIL(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     DUPLICATED_NICKNAME(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
+    INVALID_CHECK_SIGN_IN_INFO(HttpStatus.BAD_REQUEST, "유효하지 않은 중복 체크 요청 형식입니다"),
 
     // file domain
     INVALID_FILE(HttpStatus.BAD_REQUEST, "업로드할 파일이 유효하지 않습니다."),

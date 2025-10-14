@@ -27,6 +27,15 @@ public class UserService {
         return new SignInResponse(savedId);
     }
 
+    public SignInAvailableResponse checkAvailableSignInInfo(String email, String nickname) {
+        if (email == null && nickname == null) {
+            throw new CustomException(ErrorCode.INVALID_CHECK_SIGN_IN_INFO);
+        }
+        validateDuplicateUser(email, nickname);
+
+        return new SignInAvailableResponse(true);
+    }
+
     private void validateDuplicateUser(String email, String nickname) {
         userRepository.findByEmail(email)
                 .ifPresent(user -> {
