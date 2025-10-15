@@ -1,6 +1,10 @@
 package com.community.domain.user.controller;
 
 import com.community.domain.user.dto.response.SignInAvailableResponse;
+import com.community.domain.user.dto.response.UserResponse;
+import com.community.domain.auth.dto.AuthenticatedUser;
+import com.community.domain.auth.annotation.Auth;
+import com.community.domain.auth.annotation.AuthUser;
 import com.community.global.response.ApiResponse;
 import com.community.domain.user.dto.request.SignInRequest;
 import com.community.domain.user.dto.response.SignInResponse;
@@ -34,5 +38,14 @@ public class UserController {
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.success("사용할 수 있는 정보입니다.", res));
+    }
+
+    @Auth
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> getMyProfile(@AuthUser AuthenticatedUser authenticatedUser) {
+        UserResponse profile = userService.getUserProfile(authenticatedUser.userId());
+        return ResponseEntity
+                .ok()
+                .body(ApiResponse.success("사용자 정보 조회에 성공했습니다.", profile));
     }
 }
