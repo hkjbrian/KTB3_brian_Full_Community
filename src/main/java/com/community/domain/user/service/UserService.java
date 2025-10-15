@@ -1,14 +1,16 @@
 package com.community.domain.user.service;
 
-import com.community.domain.user.dto.response.SignInAvailableResponse;
-import com.community.global.exception.CustomException;
-import com.community.global.exception.ErrorCode;
 import com.community.domain.file.service.FileStorageService;
+import com.community.domain.user.dto.request.PasswordUpdateRequest;
 import com.community.domain.user.dto.request.SignInRequest;
+import com.community.domain.user.dto.request.UpdateRequest;
+import com.community.domain.user.dto.response.SignInAvailableResponse;
 import com.community.domain.user.dto.response.SignInResponse;
 import com.community.domain.user.dto.response.UserResponse;
 import com.community.domain.user.model.User;
 import com.community.domain.user.repository.UserRepository;
+import com.community.global.exception.CustomException;
+import com.community.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,16 +46,54 @@ public class UserService {
         return new UserResponse(user.getId(), user.getEmail(), user.getNickname(), user.getImageUrl());
     }
 
-    private void validateDuplicateUser(String email, String nickname) {
-        userRepository.findByEmail(email)
-                .ifPresent(user -> {
-                    throw new CustomException(ErrorCode.DUPLICATED_EMAIL);
-                });
+    public void updateProfile(Long userId, UpdateRequest req) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
-        userRepository.findByNickname(nickname)
-                .ifPresent(user -> {
-                    throw new CustomException(ErrorCode.DUPLICATED_NICKNAME);
-                });
+        if (req.getNickname() != null && !req.getNickname().isBlank()
+                && !req.getNickname().equals(user.getNickname())) {
+            validateDuplicateUser(null, user.getNickname());
+            user.updateNickname(req.getNickname());
+        }
+
+        if (req.getFile() != null && !req.getFile().isEmpty()) {
+            String previousImageUrl = user.getImageUrl();
+            String imageUrl = fileStorageService.save(req.getFile());
+            user.updateImageUrl(imageUrl);
+            if (previousImageUrl != null) {
+                fileStorageService.delete(previousImageUrl);
+            }
+        }
+
+        userRepository.save(user);
+    }
+
+    public void changePassword(Long userId, PasswordUpdateRequest req) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (!user.getPassword().equals(req.getCurrentPassword())) {
+            throw new CustomException(ErrorCode.INVALID_CURRENT_PASSWORD);
+        }
+
+        user.updatePassword(req.getNewPassword());
+        userRepository.save(user);
+    }
+
+    private void validateDuplicateUser(String email, String nickname) {
+        if (email != null) {
+            userRepository.findByEmail(email)
+                    .ifPresent(user -> {
+                        throw new CustomException(ErrorCode.DUPLICATED_EMAIL);
+                    });
+        }
+
+        if (nickname != null) {
+            userRepository.findByNickname(nickname)
+                    .ifPresent(user -> {
+                        throw new CustomException(ErrorCode.DUPLICATED_NICKNAME);
+                    });
+        }
     }
 
     private String saveProfileImage(MultipartFile file) {

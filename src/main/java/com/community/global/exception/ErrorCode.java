@@ -11,6 +11,7 @@ public enum ErrorCode {
     // user domain
     // [400]
     INVALID_CHECK_SIGN_IN_INFO(HttpStatus.BAD_REQUEST, "유효하지 않은 중복 체크 요청 형식입니다"),
+    INVALID_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다."),
     // [401]
     UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
     // [404]

@@ -16,5 +16,7 @@ public class MessageConstants {
     public static final String NICKNAME_REQUIRED = "닉네임 값은 필수입니다.";
     public static final String NICKNAME_SIZE_INVALID = "닉네임은 최대 10자까지 작성 가능합니다.";
 
+    // profile
+    public static final String PROFILE_UPDATE_REQUIRED = "수정할 닉네임 또는 이미지를 입력해야 합니다.";
 
 }
