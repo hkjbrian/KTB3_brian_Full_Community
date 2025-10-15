@@ -1,12 +1,13 @@
 package com.community.domain.post.repository;
 
 import com.community.domain.post.model.Post;
+import org.springframework.stereotype.Repository;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Repository
 public class InMemoryPostRepository implements PostRepository {
 
     private static final Map<Long, Post> store = new ConcurrentHashMap<>();
@@ -30,5 +31,12 @@ public class InMemoryPostRepository implements PostRepository {
     @Override
     public Optional<Post> findById(Long postId) {
         return Optional.ofNullable(store.get(postId));
+    }
+
+    @Override
+    public List<Post> findAll() {
+        List<Post> posts = new ArrayList<>(store.values());
+        posts.sort(Comparator.comparing(Post::getId, Comparator.reverseOrder()));
+        return posts;
     }
 }
