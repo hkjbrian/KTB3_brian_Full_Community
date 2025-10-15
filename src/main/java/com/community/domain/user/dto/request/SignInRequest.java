@@ -8,21 +8,24 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
+import static com.community.global.validation.MessageConstants.*;
+
+
 @Data
 public class SignInRequest {
 
-    @NotBlank(message = "이메일 값은 필수입니다.")
-    @Email(message = "유효한 이메일 형식이 아닙니다.")
+    @NotBlank(message = EMAIL_REQUIRED)
+    @Email(message = EMAIL_FORMAT_INVALID)
     private String email;
 
-    @NotBlank(message = "비밀번호 값은 필수입니다.")
+    @NotBlank(message = PASSWORD_REQUIRED)
     @Password
-    @Size(min = 8, max = 20 , message = "비밀번호는 8자 이상, 20자 이하입니다.")
+    @Size(min = 8, max = 20, message = PASSWORD_SIZE_INVALID)
     private String password;
 
-    @NotBlank(message = "닉네임 값은 필수입니다.")
+    @NotBlank(message = NICKNAME_REQUIRED)
     @NoWhiteSpace
-    @Size(max = 10, message = "닉네임은 최대 10자까지 작성 가능합니다.")
+    @Size(max = 10, message = NICKNAME_SIZE_INVALID)
     private String nickname;
 
     private MultipartFile file;

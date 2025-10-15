@@ -6,15 +6,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import static com.community.global.validation.MessageConstants.*;
+
 @Data
 public class LoginRequest {
 
-    @NotBlank(message = "이메일 값은 필수입니다.")
-    @Email(message = "유효한 이메일 형식이 아닙니다.")
+    @NotBlank(message = EMAIL_REQUIRED)
+    @Email(message = EMAIL_FORMAT_INVALID)
     private String email;
 
-    @NotBlank(message = "비밀번호 값은 필수입니다.")
+    @NotBlank(message = PASSWORD_REQUIRED)
     @Password
-    @Size(min = 8, max = 20 , message = "비밀번호는 8자 이상, 20자 이하입니다.")
+    @Size(min = 8, max = 20, message = PASSWORD_SIZE_INVALID)
     private String password;
 }
