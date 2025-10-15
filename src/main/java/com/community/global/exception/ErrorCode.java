@@ -30,6 +30,12 @@ public enum ErrorCode {
     // [500]
     TOKEN_GENERATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 발급에 실패했습니다."),
 
+    // post domain
+    // [403]
+    POST_FORBIDDEN(HttpStatus.FORBIDDEN, "게시글에 대한 권한이 없습니다."),
+    // [404]
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
+
     // file domain
     // [400]
     INVALID_FILE(HttpStatus.BAD_REQUEST, "업로드할 파일이 유효하지 않습니다."),
