@@ -45,4 +45,20 @@ public class AuthService {
         return new LoginResult(loginResponse, refreshToken.token(),
                 Duration.between(Instant.now(), refreshToken.expiresAt()).toSeconds());
     }
+
+    public TokenPayload verifyAndParseAccessToken(String token) {
+
+        return jwtTokenProvider.parseAccessToken(token);
+    }
+
+    public TokenPayload verifyAndParseRefreshToken(String token) {
+        TokenPayload payload = jwtTokenProvider.parseRefreshToken(token);
+        RefreshTokenStore.RefreshToken stored = refreshTokenStore.find(token)
+                .orElseThrow(() -> new CustomException(ErrorCode.REFRESH_TOKEN_MISMATCH));
+        if (!stored.userId().equals(payload.userId()) || stored.isExpired()) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_MISMATCH);
+        }
+
+        return payload;
+    }
 }
