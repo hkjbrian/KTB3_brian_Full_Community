@@ -6,6 +6,7 @@ import com.community.global.exception.ErrorCode;
 import com.community.domain.file.service.FileStorageService;
 import com.community.domain.user.dto.request.SignInRequest;
 import com.community.domain.user.dto.response.SignInResponse;
+import com.community.domain.user.dto.response.UserResponse;
 import com.community.domain.user.model.User;
 import com.community.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,13 @@ public class UserService {
         validateDuplicateUser(email, nickname);
 
         return new SignInAvailableResponse(true);
+    }
+
+    public UserResponse getUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        return new UserResponse(user.getId(), user.getEmail(), user.getNickname(), user.getImageUrl());
     }
 
     private void validateDuplicateUser(String email, String nickname) {
