@@ -26,10 +26,10 @@ public class AuthService {
 
     public LoginResult login(LoginRequest req) {
         User user = userRepository.findByEmail(req.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+                .orElseThrow(() -> new CustomException(ErrorCode.LOGIN_FAILED));
 
         if (!user.getPassword().equals(req.getPassword())) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+            throw new CustomException(ErrorCode.LOGIN_FAILED);
         }
 
         var accessToken = jwtTokenProvider.createAccessToken(user.getId());
