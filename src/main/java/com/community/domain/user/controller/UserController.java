@@ -73,4 +73,14 @@ public class UserController {
                 .ok()
                 .body(ApiResponse.success("비밀번호가 수정되었습니다.", null));
     }
+
+    @Auth
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<Void>> deletePassword(@AuthUser AuthenticatedUser authenticatedUser) {
+        userService.deleteUser(authenticatedUser.userId());
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
 }

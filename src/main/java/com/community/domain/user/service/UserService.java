@@ -1,6 +1,7 @@
 package com.community.domain.user.service;
 
 import com.community.domain.file.service.FileStorageService;
+import com.community.domain.post.service.PostService;
 import com.community.domain.user.dto.request.PasswordUpdateRequest;
 import com.community.domain.user.dto.request.SignInRequest;
 import com.community.domain.user.dto.request.UpdateRequest;
@@ -21,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final PostService postService;
 
     public SignInResponse signIn(SignInRequest req) {
         validateDuplicateUser(req.getEmail(), req.getNickname());
@@ -78,6 +80,14 @@ public class UserService {
 
         user.updatePassword(req.getNewPassword());
         userRepository.save(user);
+    }
+
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+        fileStorageService.delete(user.getImageUrl());
+        postService.deleteAllPostByUserId(userId);
+        userRepository.delete(user);
     }
 
     private void validateDuplicateUser(String email, String nickname) {
