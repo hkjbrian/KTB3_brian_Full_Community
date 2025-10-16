@@ -61,4 +61,23 @@ public class AuthService {
 
         return payload;
     }
+
+    public LoginResult refresh(String token) {
+        TokenPayload payload = verifyAndParseRefreshToken(token);
+
+        refreshTokenStore.delete(token);
+
+        var accessToken = jwtTokenProvider.createAccessToken(payload.userId());
+        var refreshToken = jwtTokenProvider.createRefreshToken(payload.userId());
+        refreshTokenStore.store(refreshToken.token(), payload.userId(), refreshToken.expiresAt());
+
+        LoginResponse loginResponse = new LoginResponse(
+                accessToken.token(),
+                Duration.between(Instant.now(), accessToken.expiresAt()).toSeconds(),
+                "Bearer"
+        );
+
+        return new LoginResult(loginResponse, refreshToken.token(),
+                Duration.between(Instant.now(), refreshToken.expiresAt()).toSeconds());
+    }
 }
