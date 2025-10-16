@@ -40,4 +40,11 @@ public class InMemoryCommentRepository implements CommentRepository {
                 .filter(comment -> Objects.equals(comment.getPostId(), postId))
                 .toList();
     }
+
+    @Override
+    public long countByPostId(Long postId) {
+        return store.values().stream()
+                .filter(comment -> Objects.equals(comment.getPostId(), postId))
+                .count();
+    }
 }

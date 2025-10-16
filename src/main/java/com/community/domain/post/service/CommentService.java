@@ -60,6 +60,10 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
+    public Long countComments(Long postId) {
+        return commentRepository.countByPostId(postId);
+    }
+
     private void ensurePostExists(Long postId) {
         postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
