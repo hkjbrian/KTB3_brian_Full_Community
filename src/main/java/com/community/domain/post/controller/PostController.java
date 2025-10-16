@@ -6,21 +6,30 @@ import com.community.domain.auth.dto.AuthenticatedUser;
 import com.community.domain.post.dto.request.PostCreateRequest;
 import com.community.domain.post.dto.request.PostUpdateRequest;
 import com.community.domain.post.dto.response.PostIdResponse;
+import com.community.domain.post.dto.response.PostLikeResponse;
 import com.community.domain.post.dto.response.PostListResponse;
 import com.community.domain.post.dto.response.PostSingleResponse;
 import com.community.domain.post.service.PostService;
 import com.community.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
 public class PostController {
 
+    private static final String URL_PREFIX = "/posts";
+
+    @Value("${host}")
+    private static String HOST;
     private final PostService postService;
 
     @GetMapping
@@ -39,13 +48,14 @@ public class PostController {
         PostIdResponse response = postService.createPost(authenticatedUser.userId(), request);
 
         return ResponseEntity
-                .ok()
+                .created(URI.create(HOST + URL_PREFIX + "/" + response.getId()))
                 .body(ApiResponse.success("게시글이 등록되었습니다.", response));
     }
 
     @GetMapping("/{postId}")
     public ResponseEntity<ApiResponse<PostSingleResponse>> getPost(@PathVariable Long postId) {
         PostSingleResponse response = postService.viewPost(postId);
+
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.success("게시글 상세 조회에 성공했습니다.", response));
@@ -57,6 +67,7 @@ public class PostController {
                                                                   @AuthUser AuthenticatedUser authenticatedUser,
                                                                   @ModelAttribute @Valid PostUpdateRequest request) {
         PostIdResponse response = postService.updatePost(postId, authenticatedUser.userId(), request);
+
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.success("게시글이 수정되었습니다.", response));
@@ -67,8 +78,32 @@ public class PostController {
     public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable Long postId,
                                                         @AuthUser AuthenticatedUser authenticatedUser) {
         postService.deletePost(postId, authenticatedUser.userId());
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .body(ApiResponse.success("게시글이 삭제되었습니다."));
+    }
+
+    @Auth
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<ApiResponse<Void>> toggleLike(@PathVariable Long postId,
+                                                        @AuthUser AuthenticatedUser authenticatedUser) {
+        PostLikeResponse response = postService.toggleLike(postId, authenticatedUser.userId());
+        String message = response.isLiked() ? "게시글에 좋아요를 표시했습니다." : "게시글 좋아요가 취소되었습니다.";
+
         return ResponseEntity
                 .ok()
-                .body(ApiResponse.success("게시글이 삭제되었습니다.", null));
+                .body(ApiResponse.success(message));
+    }
+
+    @Auth
+    @GetMapping("/{postId}/like")
+    public ResponseEntity<ApiResponse<PostLikeResponse>> isUserLikedPost(@PathVariable Long postId,
+                                                                         @AuthUser AuthenticatedUser authenticatedUser) {
+        PostLikeResponse res = postService.checkUserLikedPost(postId, authenticatedUser.userId());
+
+        return ResponseEntity
+                .ok()
+                .body(ApiResponse.success("유저의 게시글 좋아요 여부 조회에 성공했습니다.", res));
     }
 }
