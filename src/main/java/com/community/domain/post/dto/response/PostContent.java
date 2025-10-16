@@ -14,19 +14,19 @@ public class PostContent {
     private final String title;
     private final String image;
     private final String body;
-    private final Long likeCount;
     private final Long viewCount;
+    private final Long likeCount;
     private final Long commentCount;
     private final LocalDateTime createdAt;
 
-    public static PostContent from(Post post, Long commentCount) {
+    public static PostContent from(Post post, Long likeCount, Long commentCount) {
         return new PostContent(
                 post.getId(),
                 post.getTitle(),
                 post.getImageUrl(),
                 post.getBody(),
-                post.getLikeCount(),
                 post.getViewCount(),
+                likeCount,
                 commentCount,
                 post.getCreatedAt()
         );

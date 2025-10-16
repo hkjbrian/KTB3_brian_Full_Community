@@ -9,20 +9,18 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Post extends BaseTimeEntity {
 
     private Long id;
-    private final Long authorId;
+    private final Long userId;
     private String title;
     private String imageUrl;
     private String body;
     private final AtomicLong viewCount;
-    private final AtomicLong likeCount;
 
-    public Post(Long authorId, String title, String imageUrl, String body) {
-        this.authorId = authorId;
+    public Post(Long userId, String title, String imageUrl, String body) {
+        this.userId = userId;
         this.title = title;
         this.imageUrl = imageUrl;
         this.body = body;
         this.viewCount = new AtomicLong(0);
-        this.likeCount = new AtomicLong(0);
         markCreated();
     }
 
@@ -49,11 +47,7 @@ public class Post extends BaseTimeEntity {
         this.viewCount.incrementAndGet();
     }
 
-    public Long getViewCount() {
+    public long getViewCount() {
         return this.viewCount.get();
-    }
-
-    public Long getLikeCount() {
-        return this.likeCount.get();
     }
 }
