@@ -4,6 +4,7 @@ import com.community.domain.file.service.FileStorageService;
 import com.community.domain.post.dto.request.PostCreateRequest;
 import com.community.domain.post.dto.request.PostUpdateRequest;
 import com.community.domain.post.dto.response.*;
+import com.community.domain.post.like.repository.PostLikeRepository;
 import com.community.domain.post.model.Post;
 import com.community.domain.post.repository.PostRepository;
 import com.community.domain.user.model.User;
@@ -23,16 +24,14 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final PostLikeRepository postLikeRepository;
 
-    private static final Long commentCount = 0L;
+    private static final Long DEFAULT_COMMENT_COUNT = 0L;
 
     public PostListResponse getPostList() {
         List<PostSingleResponse> postList =
                 postRepository.findAll().stream()
-                        .map(post -> new PostSingleResponse(
-                                PostContent.from(post, commentCount),
-                                getAuthorResponse(post.getAuthorId())
-                        ))
+                        .map(this::toSingleResponse)
                         .toList();
 
         return new PostListResponse(postList);
@@ -41,23 +40,22 @@ public class PostService {
     public PostSingleResponse viewPost(Long postId) {
         Post post = findPost(postId);
         post.addViewCount();
-        User user = userRepository.findById(post.getAuthorId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+        postRepository.save(post);
 
-        return new PostSingleResponse(PostContent.from(post, commentCount), getAuthorResponse(post.getAuthorId()));
+        return toSingleResponse(post);
     }
 
-    public PostIdResponse createPost(Long authorId, PostCreateRequest req) {
+    public PostIdResponse createPost(Long userId, PostCreateRequest req) {
         String imageUrl = fileStorageService.save(req.getFile());
-        Post post = new Post(authorId, req.getTitle(), imageUrl, req.getBody());
+        Post post = new Post(userId, req.getTitle(), imageUrl, req.getBody());
         Long id = postRepository.save(post);
 
         return new PostIdResponse(id);
     }
 
-    public PostIdResponse updatePost(Long postId, Long authorId, PostUpdateRequest request) {
+    public PostIdResponse updatePost(Long postId, Long userId, PostUpdateRequest request) {
         Post post = findPost(postId);
-        validateAuthor(post, authorId);
+        validateAuthor(post, userId);
 
         post.updateTitle(request.getTitle());
         post.updateBody(request.getBody());
@@ -74,18 +72,48 @@ public class PostService {
         return new PostIdResponse(post.getId());
     }
 
-    public void deletePost(Long postId, Long authorId) {
+    public void deletePost(Long postId, Long userId) {
         Post post = findPost(postId);
-        validateAuthor(post, authorId);
+        validateAuthor(post, userId);
         fileStorageService.delete(post.getImageUrl());
+        postLikeRepository.deleteAllByPostId(postId);
         postRepository.delete(post);
     }
 
-    private AuthorResponse getAuthorResponse(Long authorId) {
-        User user = userRepository.findById(authorId)
+    public PostLikeResponse toggleLike(Long postId, Long userId) {
+        findPost(postId);
+        boolean alreadyLiked = postLikeRepository.exists(postId, userId);
+
+        if (alreadyLiked) {
+            postLikeRepository.delete(postId, userId);
+        } else {
+            postLikeRepository.save(postId, userId);
+        }
+
+        return new PostLikeResponse(!alreadyLiked);
+    }
+
+    public PostLikeResponse checkUserLikedPost(Long postId, Long userId) {
+        findPost(postId);
+        boolean alreadyLiked = postLikeRepository.exists(postId, userId);
+
+        return new PostLikeResponse(alreadyLiked);
+    }
+
+    private AuthorResponse getAuthorResponse(Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         return AuthorResponse.from(user);
+    }
+
+    private PostSingleResponse toSingleResponse(Post post) {
+        long likeCount = postLikeRepository.countByPostId(post.getId());
+
+        return new PostSingleResponse(
+                PostContent.from(post,likeCount, DEFAULT_COMMENT_COUNT),
+                getAuthorResponse(post.getUserId())
+        );
     }
 
     private Post findPost(Long postId) {
@@ -93,8 +121,8 @@ public class PostService {
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
     }
 
-    private void validateAuthor(Post post, Long authorId) {
-        if (!post.getAuthorId().equals(authorId)) {
+    private void validateAuthor(Post post, Long userId) {
+        if (!post.getUserId().equals(userId)) {
             throw new CustomException(ErrorCode.POST_FORBIDDEN);
         }
     }
