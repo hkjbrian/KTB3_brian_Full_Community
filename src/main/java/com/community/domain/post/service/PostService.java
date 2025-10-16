@@ -17,6 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static com.community.domain.common.util.PageUtil.paginate;
+
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -27,11 +29,12 @@ public class PostService {
     private final FileStorageService fileStorageService;
     private final CommentService commentService;
 
-    public PostListResponse getPostList() {
-        List<PostSingleResponse> postList =
-                postRepository.findAll().stream()
-                        .map(this::toSingleResponse)
-                        .toList();
+    public PostListResponse getPostList(int page, int size) {
+        List<Post> posts = postRepository.findAll();
+        List<Post> pagedPosts = paginate(posts, page, size);
+        List<PostSingleResponse> postList = pagedPosts.stream()
+                .map(this::toSingleResponse)
+                .toList();
 
         return new PostListResponse(postList);
     }

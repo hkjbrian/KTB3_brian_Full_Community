@@ -33,8 +33,11 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PostListResponse>> getPosts() {
-        PostListResponse response = postService.getPostList();
+    public ResponseEntity<ApiResponse<PostListResponse>> getPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PostListResponse response = postService.getPostList(page, size);
 
         return ResponseEntity
                 .ok()

@@ -1,5 +1,6 @@
 package com.community.domain.post.service;
 
+import com.community.domain.common.util.PageUtil;
 import com.community.domain.post.dto.request.CommentRequest;
 
 import com.community.domain.post.dto.response.*;
@@ -24,10 +25,13 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    public CommentListResponse getComments(Long postId) {
+    public CommentListResponse getComments(Long postId, int page, int size) {
         ensurePostExists(postId);
 
-        List<CommentSingleResponse> items = commentRepository.findByPostId(postId).stream()
+        List<Comment> comments = commentRepository.findByPostId(postId);
+        List<Comment> pagedComments = PageUtil.paginate(comments, page, size);
+
+        List<CommentSingleResponse> items = pagedComments.stream()
                 .map(this::toSingleResponse)
                 .toList();
 
