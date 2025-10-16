@@ -1,11 +1,13 @@
 package com.community.domain.post.repository;
 
 import com.community.domain.post.model.Comment;
+import org.springframework.stereotype.Repository;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Repository
 public class InMemoryCommentRepository implements CommentRepository {
 
     private static final Map<Long, Comment> store = new ConcurrentHashMap<>();
