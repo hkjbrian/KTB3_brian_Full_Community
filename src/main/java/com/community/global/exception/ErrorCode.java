@@ -36,6 +36,12 @@ public enum ErrorCode {
     // [404]
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
 
+    // comment domain
+    // [403]
+    COMMENT_FORBIDDEN(HttpStatus.FORBIDDEN, "댓글에 대한 권한이 없습니다."),
+    // [404]
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
+
     // file domain
     // [400]
     INVALID_FILE(HttpStatus.BAD_REQUEST, "업로드할 파일이 유효하지 않습니다."),
