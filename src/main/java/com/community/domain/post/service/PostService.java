@@ -25,8 +25,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final PostLikeRepository postLikeRepository;
-
-    private static final Long DEFAULT_COMMENT_COUNT = 0L;
+    private final CommentService commentService;
 
     public PostListResponse getPostList() {
         List<PostSingleResponse> postList =
@@ -110,8 +109,10 @@ public class PostService {
     private PostSingleResponse toSingleResponse(Post post) {
         long likeCount = postLikeRepository.countByPostId(post.getId());
 
+        Long commentCount = commentService.countComments(post.getId());
+
         return new PostSingleResponse(
-                PostContent.from(post,likeCount, DEFAULT_COMMENT_COUNT),
+                PostContent.from(post, likeCount, commentCount),
                 getAuthorResponse(post.getUserId())
         );
     }
