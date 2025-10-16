@@ -60,6 +60,10 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
+    public void deleteAllCommentByPostId(Long postId) {
+        commentRepository.deleteByPostId(postId);
+    }
+
     public Long countComments(Long postId) {
         return commentRepository.countByPostId(postId);
     }

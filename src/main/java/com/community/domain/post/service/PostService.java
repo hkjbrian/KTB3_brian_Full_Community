@@ -23,8 +23,8 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final FileStorageService fileStorageService;
     private final PostLikeRepository postLikeRepository;
+    private final FileStorageService fileStorageService;
     private final CommentService commentService;
 
     public PostListResponse getPostList() {
@@ -76,7 +76,18 @@ public class PostService {
         validateAuthor(post, userId);
         fileStorageService.delete(post.getImageUrl());
         postLikeRepository.deleteAllByPostId(postId);
+        commentService.deleteAllCommentByPostId(postId);
         postRepository.delete(post);
+    }
+
+    public void deleteAllPostByUserId(Long userId) {
+        List<Post> postList = postRepository.findAll().stream()
+                .filter(post -> post.getUserId().equals(userId))
+                .toList();
+
+        for (Post post : postList) {
+            deletePost(post.getId(), userId);
+        }
     }
 
     public PostLikeResponse toggleLike(Long postId, Long userId) {
