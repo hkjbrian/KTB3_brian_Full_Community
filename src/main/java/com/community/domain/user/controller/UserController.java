@@ -14,6 +14,7 @@ import com.community.global.response.ApiResponse;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<SignInResponse>> signIn(@ModelAttribute @Valid SignInRequest req) {
         SignInResponse res = userService.signIn(req);
         return ResponseEntity
@@ -53,7 +54,7 @@ public class UserController {
     }
 
     @Auth
-    @PatchMapping(value = "/me")
+    @PatchMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<Void>> updateProfile(@AuthUser AuthenticatedUser authenticatedUser,
                                                            @ModelAttribute @Valid UpdateRequest req) {
         userService.updateProfile(authenticatedUser.userId(), req);
