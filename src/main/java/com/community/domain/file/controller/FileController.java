@@ -23,7 +23,7 @@ public class FileController {
 
     @GetMapping("/{fileId}")
     public ResponseEntity<Resource> download(@PathVariable String fileId) {
-        StoredFile file = fileStorageService.load("/files/" + fileId);
+        StoredFile file = fileStorageService.load(fileId);
         MediaType contentType = file.getContentType() != null
                 ? MediaType.parseMediaType(file.getContentType())
                 : MediaType.APPLICATION_OCTET_STREAM;
