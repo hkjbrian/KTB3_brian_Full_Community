@@ -43,7 +43,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<LoginResponse>> refresh(
-            @CookieValue(value = "refreshToken", required = false) String refreshToken
+            @CookieValue(value = "refreshToken") String refreshToken
     ) {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new CustomException(ErrorCode.REFRESH_TOKEN_MISMATCH);
