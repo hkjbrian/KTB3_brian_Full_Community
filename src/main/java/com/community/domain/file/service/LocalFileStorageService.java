@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LocalFileStorageService implements FileStorageService {
 
     @Value("${host}")
-    private static String HOST;
+    private String HOST;
 
     private static final String FILE_ENDPOINT_PREFIX = "/files/";
     private final Map<String, StoredFile> store = new ConcurrentHashMap<>();

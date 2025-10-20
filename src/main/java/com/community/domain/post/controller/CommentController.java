@@ -28,7 +28,7 @@ public class CommentController {
     private static final String URL_PREFIX = "/posts/{postId}/comments";
 
     @Value("${host}")
-    private static String HOST;
+    private String HOST;
 
     private final CommentService commentService;
 

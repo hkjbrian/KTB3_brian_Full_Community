@@ -32,7 +32,7 @@ public class PostController {
     private static final String URL_PREFIX = "/posts";
 
     @Value("${host}")
-    private static String HOST;
+    private String HOST;
     private final PostService postService;
 
     @Operation(summary = "게시글 리스트 조회", description = "페이징 기능을 바탕으로 게시글 리스트를 조회합니다.")
