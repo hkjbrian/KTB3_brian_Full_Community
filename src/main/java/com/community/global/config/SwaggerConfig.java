@@ -10,13 +10,15 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.bind.annotation.CookieValue;
+
 
 @Configuration
 public class SwaggerConfig {
 
     static {
         SpringDocUtils.getConfig()
-                .addAnnotationsToIgnore(AuthenticatedUser.class, AuthUser.class);
+                .addAnnotationsToIgnore(AuthenticatedUser.class, AuthUser.class, CookieValue.class);
     }
 
     @Bean
