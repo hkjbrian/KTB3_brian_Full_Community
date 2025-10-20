@@ -1,9 +1,11 @@
 package com.community.domain.post.dto.response;
 
 import com.community.domain.user.model.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+@Schema(description = "작성자 응답 DTO")
 @Getter
 @AllArgsConstructor
 public class AuthorResponse {
