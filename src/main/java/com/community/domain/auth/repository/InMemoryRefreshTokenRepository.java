@@ -1,19 +1,19 @@
-package com.community.domain.auth;
+package com.community.domain.auth.repository;
 
+import com.community.domain.auth.model.RefreshToken;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class RefreshTokenStore {
+public class InMemoryRefreshTokenRepository implements RefreshTokenRepository {
 
     private final Map<String, RefreshToken> store = new ConcurrentHashMap<>();
 
-    public void store(String token, Long userId, Instant expiresAt) {
-        store.put(token, new RefreshToken(userId, expiresAt));
+    public void save(RefreshToken refreshToken) {
+        store.put(refreshToken.getToken(), refreshToken);
     }
 
     public Optional<RefreshToken> find(String token) {
@@ -22,11 +22,5 @@ public class RefreshTokenStore {
 
     public void delete(String token) {
         store.remove(token);
-    }
-
-    public record RefreshToken(Long userId, Instant expiresAt) {
-        public boolean isExpired() {
-            return Instant.now().isAfter(expiresAt);
-        }
     }
 }
