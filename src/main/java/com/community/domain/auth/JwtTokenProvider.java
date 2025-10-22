@@ -2,6 +2,7 @@ package com.community.domain.auth;
 
 import com.community.domain.auth.dto.TokenPayload;
 import com.community.domain.auth.dto.TokenResult;
+import com.community.domain.auth.service.TokenProvider;
 import com.community.global.exception.CustomException;
 import com.community.global.exception.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,11 +19,12 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class JwtTokenProvider {
+public class JwtTokenProvider implements TokenProvider {
 
     @Value("${jwt.access-expiration-seconds}")
     private Long ACCESS_TOKEN_EXPIRATION_TIME;
@@ -41,6 +43,7 @@ public class JwtTokenProvider {
 
     private final ObjectMapper objectMapper;
 
+    @Override
     public TokenPayload parseAccessToken(String token) {
         TokenPayload payload = parseToken(token);
         if (!TOKEN_TYPE_ACCESS.equals(payload.type())) {
@@ -49,6 +52,7 @@ public class JwtTokenProvider {
         return payload;
     }
 
+    @Override
     public TokenPayload parseRefreshToken(String token) {
         TokenPayload payload = parseToken(token);
         if (!TOKEN_TYPE_REFRESH.equals(payload.type())) {
@@ -57,12 +61,14 @@ public class JwtTokenProvider {
         return payload;
     }
 
-    public TokenResult createAccessToken(Long userId) {
-        return createToken(userId, ACCESS_TOKEN_EXPIRATION_TIME, TOKEN_TYPE_ACCESS);
+    @Override
+    public TokenResult createAccessToken(Map<String, Object> claims) {
+        return createToken(claims, ACCESS_TOKEN_EXPIRATION_TIME, TOKEN_TYPE_ACCESS);
     }
 
-    public TokenResult createRefreshToken(Long userId) {
-        return createToken(userId, REFRESH_TOKEN_EXPIRATION_TIME, TOKEN_TYPE_REFRESH);
+    @Override
+    public TokenResult createRefreshToken(Map<String, Object> claims) {
+        return createToken(claims, REFRESH_TOKEN_EXPIRATION_TIME, TOKEN_TYPE_REFRESH);
     }
 
     private TokenPayload parseToken(String token) {
@@ -98,7 +104,7 @@ public class JwtTokenProvider {
         }
     }
 
-    private TokenResult createToken(Long userId, long expirationSeconds, String type) {
+    private TokenResult createToken(Map<String, Object> claims, long expirationSeconds, String type) {
         try {
             Instant now = Instant.now();
             Instant expiresAt = now.plusSeconds(expirationSeconds);
@@ -108,12 +114,10 @@ public class JwtTokenProvider {
                     "typ", "JWT"
             );
 
-            Map<String, Object> payload = Map.of(
-                    "sub", userId,
-                    "iat", now.getEpochSecond(),
-                    "exp", expiresAt.getEpochSecond(),
-                    "type", type
-            );
+            Map<String, Object> payload = new HashMap<>(claims);
+            payload.put("exp", expiresAt);
+            payload.put("iat", now.toEpochMilli());
+            payload.put("type", type);
 
             String encodedHeader = BASE64_ENCODER.encodeToString(objectMapper.writeValueAsBytes(header));
             String encodedPayload = BASE64_ENCODER.encodeToString(objectMapper.writeValueAsBytes(payload));
