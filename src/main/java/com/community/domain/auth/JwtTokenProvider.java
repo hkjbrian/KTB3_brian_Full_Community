@@ -115,8 +115,8 @@ public class JwtTokenProvider implements TokenProvider {
             );
 
             Map<String, Object> payload = new HashMap<>(claims);
-            payload.put("exp", expiresAt);
-            payload.put("iat", now.toEpochMilli());
+            payload.put("exp", expiresAt.getEpochSecond());
+            payload.put("iat", now.getEpochSecond());
             payload.put("type", type);
 
             String encodedHeader = BASE64_ENCODER.encodeToString(objectMapper.writeValueAsBytes(header));
