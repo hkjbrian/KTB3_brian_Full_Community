@@ -24,14 +24,15 @@ import java.net.URI;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
-public class PostController {
+public class PostController implements PostApiSpec {
 
     private static final String URL_PREFIX = "/posts";
 
     @Value("${host}")
-    private static String HOST;
+    private String HOST;
     private final PostService postService;
 
+    @Override
     @GetMapping
     public ResponseEntity<ApiResponse<PostListResponse>> getPosts(
             @RequestParam(defaultValue = "0") int page,
@@ -44,6 +45,7 @@ public class PostController {
                 .body(ApiResponse.success("게시글 목록 조회에 성공했습니다.", response));
     }
 
+    @Override
     @Auth
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<PostIdResponse>> createPost(@AuthUser AuthenticatedUser authenticatedUser,
@@ -55,6 +57,7 @@ public class PostController {
                 .body(ApiResponse.success("게시글이 등록되었습니다.", response));
     }
 
+    @Override
     @GetMapping("/{postId}")
     public ResponseEntity<ApiResponse<PostSingleResponse>> getPost(@PathVariable Long postId) {
         PostSingleResponse response = postService.viewPost(postId);
@@ -64,6 +67,7 @@ public class PostController {
                 .body(ApiResponse.success("게시글 상세 조회에 성공했습니다.", response));
     }
 
+    @Override
     @Auth
     @PutMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<PostIdResponse>> updatePost(@PathVariable Long postId,
@@ -76,6 +80,7 @@ public class PostController {
                 .body(ApiResponse.success("게시글이 수정되었습니다.", response));
     }
 
+    @Override
     @Auth
     @DeleteMapping("/{postId}")
     public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable Long postId,
@@ -87,6 +92,7 @@ public class PostController {
                 .body(ApiResponse.success("게시글이 삭제되었습니다."));
     }
 
+    @Override
     @Auth
     @PostMapping("/{postId}/like")
     public ResponseEntity<ApiResponse<Void>> toggleLike(@PathVariable Long postId,
@@ -99,6 +105,7 @@ public class PostController {
                 .body(ApiResponse.success(message));
     }
 
+    @Override
     @Auth
     @GetMapping("/{postId}/like")
     public ResponseEntity<ApiResponse<PostLikeResponse>> isUserLikedPost(@PathVariable Long postId,

@@ -1,11 +1,13 @@
 package com.community.domain.post.dto.response;
 
 import com.community.domain.post.model.Post;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Schema(description = "Post 내용 응답 DTO")
 @Getter
 @AllArgsConstructor
 public class PostContent {

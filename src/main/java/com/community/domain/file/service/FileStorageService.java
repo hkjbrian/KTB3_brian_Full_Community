@@ -7,7 +7,7 @@ public interface FileStorageService {
 
     String save(MultipartFile file);
 
-    StoredFile load(String filePath);
+    StoredFile load(String fileId);
 
     void delete(String filePath);
 }

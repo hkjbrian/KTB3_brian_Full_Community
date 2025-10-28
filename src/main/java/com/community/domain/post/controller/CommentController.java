@@ -20,15 +20,16 @@ import java.net.URI;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts/{postId}/comments")
-public class CommentController {
+public class CommentController implements CommentApiSpec {
 
     private static final String URL_PREFIX = "/posts/{postId}/comments";
 
     @Value("${host}")
-    private static String HOST;
+    private String HOST;
 
     private final CommentService commentService;
 
+    @Override
     @GetMapping
     public ResponseEntity<ApiResponse<CommentListResponse>> getComments(@PathVariable Long postId,
                                                                         @RequestParam(defaultValue = "0") int page,
@@ -40,6 +41,7 @@ public class CommentController {
                 .body(ApiResponse.success("게시글 댓글 조회에 성공했습니다.", res));
     }
 
+    @Override
     @Auth
     @PostMapping
     public ResponseEntity<ApiResponse<CommentIdResponse>> createComment(@PathVariable Long postId,
@@ -52,6 +54,7 @@ public class CommentController {
                 .body(ApiResponse.success("게시글 댓글 등록에 성공했습니다.", res));
     }
 
+    @Override
     @Auth
     @PutMapping("/{commentId}")
     public ResponseEntity<ApiResponse<CommentIdResponse>> updateComment(@PathVariable Long postId,
@@ -65,6 +68,7 @@ public class CommentController {
                 .body(ApiResponse.success("게시글 댓글 수정에 성공했습니다.", response));
     }
 
+    @Override
     @Auth
     @DeleteMapping("/{commentId}")
     public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable Long postId,
