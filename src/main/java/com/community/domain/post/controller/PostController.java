@@ -3,6 +3,7 @@ package com.community.domain.post.controller;
 import com.community.domain.auth.annotation.Auth;
 import com.community.domain.auth.annotation.AuthUser;
 import com.community.domain.auth.dto.AuthenticatedUser;
+import com.community.domain.common.util.UriUtil;
 import com.community.domain.post.dto.request.PostCreateRequest;
 import com.community.domain.post.dto.request.PostUpdateRequest;
 import com.community.domain.post.dto.response.PostIdResponse;
@@ -19,17 +20,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
 public class PostController implements PostApiSpec {
 
-    private static final String URL_PREFIX = "/posts";
-
-    @Value("${host}")
-    private String HOST;
     private final PostService postService;
 
     @Override
@@ -50,11 +45,11 @@ public class PostController implements PostApiSpec {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<PostIdResponse>> createPost(@AuthUser AuthenticatedUser authenticatedUser,
                                                                   @ModelAttribute @Valid PostCreateRequest request) {
-        PostIdResponse response = postService.createPost(authenticatedUser.userId(), request);
+        PostIdResponse res = postService.createPost(authenticatedUser.userId(), request);
 
         return ResponseEntity
-                .created(URI.create(HOST + URL_PREFIX + "/" + response.getId()))
-                .body(ApiResponse.success("게시글이 등록되었습니다.", response));
+                .created(UriUtil.makeLocationFromCurrent(res.getId()))
+                .body(ApiResponse.success("게시글이 등록되었습니다.", res));
     }
 
     @Override

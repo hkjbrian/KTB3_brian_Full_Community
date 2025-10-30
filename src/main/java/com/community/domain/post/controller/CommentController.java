@@ -3,6 +3,7 @@ package com.community.domain.post.controller;
 import com.community.domain.auth.annotation.Auth;
 import com.community.domain.auth.annotation.AuthUser;
 import com.community.domain.auth.dto.AuthenticatedUser;
+import com.community.domain.common.util.UriUtil;
 import com.community.domain.post.dto.request.CommentRequest;
 import com.community.domain.post.dto.response.CommentIdResponse;
 import com.community.domain.post.dto.response.CommentListResponse;
@@ -15,17 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts/{postId}/comments")
 public class CommentController implements CommentApiSpec {
-
-    private static final String URL_PREFIX = "/posts/{postId}/comments";
-
-    @Value("${host}")
-    private String HOST;
 
     private final CommentService commentService;
 
@@ -47,10 +41,11 @@ public class CommentController implements CommentApiSpec {
     public ResponseEntity<ApiResponse<CommentIdResponse>> createComment(@PathVariable Long postId,
                                                                         @AuthUser AuthenticatedUser authenticatedUser,
                                                                         @RequestBody @Valid CommentRequest request) {
+
         CommentIdResponse res = commentService.createComment(postId, authenticatedUser.userId(), request);
 
         return ResponseEntity
-                .created(URI.create(HOST + URL_PREFIX.replace("{postId}", postId.toString()) + "/" + res.getId()))
+                .created(UriUtil.makeLocationFromCurrent(res.getId()))
                 .body(ApiResponse.success("게시글 댓글 등록에 성공했습니다.", res));
     }
 
