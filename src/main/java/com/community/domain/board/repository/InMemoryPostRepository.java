@@ -48,4 +48,11 @@ public class InMemoryPostRepository implements PostRepository {
         posts.sort(Comparator.comparing(Post::getId, Comparator.reverseOrder()));
         return posts;
     }
+
+    @Override
+    public List<Post> findAllByUserId(Long userId) {
+        return store.values().stream()
+                .filter(post -> post.getUser().getId().equals(userId))
+                .toList();
+    }
 }
