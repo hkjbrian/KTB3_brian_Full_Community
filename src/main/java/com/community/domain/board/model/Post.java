@@ -8,13 +8,11 @@ import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Generated;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "posts")
 public class Post extends BaseTimeEntity {
 
     @Id
@@ -30,7 +28,6 @@ public class Post extends BaseTimeEntity {
     @Size(max = 26)
     private String title;
 
-    @Generated
     @Size(max = 255)
     private String imageUrl;
 
@@ -38,14 +35,14 @@ public class Post extends BaseTimeEntity {
     @Lob
     private String body;
 
-    private AtomicLong viewCount;
+    private Long viewCount;
 
     public Post(User user, String title, String imageUrl, String body) {
         this.user = user;
         this.title = title;
         this.imageUrl = imageUrl;
         this.body = body;
-        this.viewCount = new AtomicLong(0);
+        this.viewCount = 0L;
     }
 
     public void updateTitle(String title) {
@@ -61,10 +58,10 @@ public class Post extends BaseTimeEntity {
     }
 
     public void addViewCount() {
-        this.viewCount.incrementAndGet();
+        this.viewCount += 1;
     }
 
     public long getViewCount() {
-        return this.viewCount.get();
+        return this.viewCount;
     }
 }
