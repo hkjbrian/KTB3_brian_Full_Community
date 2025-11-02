@@ -15,15 +15,9 @@ public class Comment extends BaseTimeEntity {
         this.postId = postId;
         this.userId = userId;
         this.body = body;
-        markCreated();
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public void updateBody(String body) {
         this.body = body;
-        markUpdated();
     }
 }

@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Generated;
 
 @Entity
 @Getter
@@ -35,7 +34,7 @@ public class User extends BaseTimeEntity {
     @Size(max = 10)
     private String nickname;
 
-    @Generated()
+    @NotBlank
     @Size(max = 255)
     private String imageUrl;
 
@@ -44,10 +43,6 @@ public class User extends BaseTimeEntity {
         this.password = password;
         this.nickname = nickname;
         this.imageUrl = imageUrl;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public void updatePassword(String password) {
