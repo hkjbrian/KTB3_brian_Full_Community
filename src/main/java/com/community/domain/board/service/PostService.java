@@ -1,26 +1,30 @@
 package com.community.domain.board.service;
 
-import com.community.domain.file.service.FileStorageService;
 import com.community.domain.board.dto.request.PostCreateRequest;
 import com.community.domain.board.dto.request.PostUpdateRequest;
 import com.community.domain.board.dto.response.*;
-import com.community.domain.board.repository.PostLikeRepository;
 import com.community.domain.board.model.Post;
+import com.community.domain.board.model.PostLike;
+import com.community.domain.board.repository.PostLikeRepository;
 import com.community.domain.board.repository.PostRepository;
+import com.community.domain.file.service.FileStorageService;
 import com.community.domain.user.model.User;
 import com.community.domain.user.repository.UserRepository;
 import com.community.global.exception.CustomException;
 import com.community.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.community.domain.common.util.PageUtil.paginate;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PostService {
 
     private final PostRepository postRepository;
@@ -29,6 +33,7 @@ public class PostService {
     private final FileStorageService fileStorageService;
     private final CommentService commentService;
 
+    @Transactional(readOnly = true)
     public PostListResponse getPostList(int page, int size) {
         List<Post> posts = postRepository.findAll();
         List<Post> pagedPosts = paginate(posts, page, size);
@@ -42,14 +47,16 @@ public class PostService {
     public PostSingleResponse viewPost(Long postId) {
         Post post = findPost(postId);
         post.addViewCount();
-        postRepository.save(post);
 
         return toSingleResponse(post);
     }
 
     public PostIdResponse createPost(Long userId, PostCreateRequest req) {
         String imageUrl = fileStorageService.save(req.getFile());
-        Post post = new Post(userId, req.getTitle(), imageUrl, req.getBody());
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
+        Post post = new Post(user, req.getTitle(), imageUrl, req.getBody());
         Long id = postRepository.save(post);
 
         return new PostIdResponse(id);
@@ -84,9 +91,7 @@ public class PostService {
     }
 
     public void deleteAllPostByUserId(Long userId) {
-        List<Post> postList = postRepository.findAll().stream()
-                .filter(post -> post.getUserId().equals(userId))
-                .toList();
+        List<Post> postList = postRepository.findAllByUserId(userId);
 
         for (Post post : postList) {
             deletePost(post.getId(), userId);
@@ -94,23 +99,26 @@ public class PostService {
     }
 
     public PostLikeResponse toggleLike(Long postId, Long userId) {
-        findPost(postId);
-        boolean alreadyLiked = postLikeRepository.exists(postId, userId);
+        Post post = findPost(postId);
+        User user = findUser(userId);
+        Optional<PostLike> postLike = postLikeRepository.findByPostIdAndUserId(postId, userId);
 
-        if (alreadyLiked) {
-            postLikeRepository.delete(postId, userId);
+        boolean liked = postLike.isPresent();
+        if (liked) {
+            postLikeRepository.delete(postLike.get());
         } else {
-            postLikeRepository.save(postId, userId);
+            postLikeRepository.save(new PostLike(post, user));
         }
 
-        return new PostLikeResponse(!alreadyLiked);
+        return new PostLikeResponse(!liked);
     }
 
+    @Transactional(readOnly = true)
     public PostLikeResponse checkUserLikedPost(Long postId, Long userId) {
         findPost(postId);
-        boolean alreadyLiked = postLikeRepository.exists(postId, userId);
+        boolean liked = postLikeRepository.existsByPostIdAndUserId(postId, userId);
 
-        return new PostLikeResponse(alreadyLiked);
+        return new PostLikeResponse(liked);
     }
 
     private AuthorResponse getAuthorResponse(Long userId) {
@@ -127,7 +135,7 @@ public class PostService {
 
         return new PostSingleResponse(
                 PostContent.from(post, likeCount, commentCount),
-                getAuthorResponse(post.getUserId())
+                getAuthorResponse(post.getUser().getId())
         );
     }
 
@@ -136,8 +144,13 @@ public class PostService {
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
     }
 
+    private User findUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+    }
+
     private void validateAuthor(Post post, Long userId) {
-        if (!post.getUserId().equals(userId)) {
+        if (!post.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.POST_FORBIDDEN);
         }
     }

@@ -15,13 +15,15 @@ import com.community.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
-    @Value("${application.local.default_email}")
+    @Value("${application.local.default_image_url}")
     private String DEFAULT_IMAGE_URL;
 
     private final UserRepository userRepository;
@@ -33,7 +35,7 @@ public class UserService {
 
         MultipartFile file = req.getFile();
         String imageUrl = DEFAULT_IMAGE_URL;
-        if (file != null && file.isEmpty()) {
+        if (file != null && !file.isEmpty()) {
             imageUrl = fileStorageService.save(file);
         }
 
@@ -42,6 +44,7 @@ public class UserService {
         return new SignInResponse(savedId);
     }
 
+    @Transactional(readOnly = true)
     public SignInAvailableResponse checkAvailableSignInInfo(String email, String nickname) {
         if (email == null && nickname == null) {
             throw new CustomException(ErrorCode.INVALID_CHECK_SIGN_IN_INFO);
@@ -51,6 +54,7 @@ public class UserService {
         return new SignInAvailableResponse(true);
     }
 
+    @Transactional(readOnly = true)
     public UserResponse getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));

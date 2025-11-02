@@ -1,5 +1,6 @@
 package com.community.domain.board.service;
 
+import com.community.domain.board.model.Post;
 import com.community.domain.common.util.PageUtil;
 import com.community.domain.board.dto.request.CommentRequest;
 
@@ -14,17 +15,20 @@ import com.community.global.exception.CustomException;
 import com.community.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public CommentListResponse getComments(Long postId, int page, int size) {
         ensurePostExists(postId);
 
@@ -39,9 +43,14 @@ public class CommentService {
     }
 
     public CommentIdResponse createComment(Long postId, Long authorId, CommentRequest request) {
-        ensurePostExists(postId);
+        Post post = postRepository.findById(postId).orElseThrow(
+                ()-> new CustomException(ErrorCode.POST_NOT_FOUND)
+        );
+        User author = userRepository.findById(authorId).orElseThrow(
+                () -> new CustomException(ErrorCode.NOT_FOUND_USER)
+        );
 
-        Comment comment = new Comment(postId, authorId, request.getBody());
+        Comment comment = new Comment(post, author, request.getBody());
         Long id = commentRepository.save(comment);
         return new CommentIdResponse(id);
     }
@@ -52,7 +61,6 @@ public class CommentService {
         validateCommentAuthor(comment, authorId);
 
         comment.updateBody(request.getBody());
-        commentRepository.save(comment);
         return new CommentIdResponse(comment.getId());
     }
 
@@ -68,6 +76,7 @@ public class CommentService {
         commentRepository.deleteByPostId(postId);
     }
 
+    @Transactional(readOnly = true)
     public Long countComments(Long postId) {
         return commentRepository.countByPostId(postId);
     }
@@ -83,13 +92,13 @@ public class CommentService {
     }
 
     private void validateCommentPost(Comment comment, Long postId) {
-        if (!comment.getPostId().equals(postId)) {
+        if (!comment.getPost().getId().equals(postId)) {
             throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
         }
     }
 
     private void validateCommentAuthor(Comment comment, Long authorId) {
-        if (!comment.getUserId().equals(authorId)) {
+        if (!comment.getUser().getId().equals(authorId)) {
             throw new CustomException(ErrorCode.COMMENT_FORBIDDEN);
         }
     }
@@ -100,7 +109,7 @@ public class CommentService {
                 comment.getBody(),
                 comment.getUpdatedAt());
 
-        AuthorResponse authorResponse = toAuthor(comment.getUserId());
+        AuthorResponse authorResponse = toAuthor(comment.getUser().getId());
 
         return new CommentSingleResponse(commentContent, authorResponse);
     }
