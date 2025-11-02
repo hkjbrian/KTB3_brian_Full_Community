@@ -47,19 +47,19 @@ public class InMemoryCommentRepository implements CommentRepository {
     public List<Comment> findByPostId(Long postId) {
 
         return store.values().stream()
-                .filter(comment -> Objects.equals(comment.getPostId(), postId))
+                .filter(comment -> Objects.equals(comment.getPost().getId(), postId))
                 .toList();
     }
 
     @Override
-    public long countByPostId(Long postId) {
+    public Long countByPostId(Long postId) {
         return store.values().stream()
-                .filter(comment -> Objects.equals(comment.getPostId(), postId))
+                .filter(comment -> Objects.equals(comment.getPost().getId(), postId))
                 .count();
     }
 
     @Override
     public void deleteByPostId(Long postId) {
-        store.values().removeIf(comment -> Objects.equals(comment.getPostId(), postId));
+        store.values().removeIf(comment -> Objects.equals(comment.getPost().getId(), postId));
     }
 }
