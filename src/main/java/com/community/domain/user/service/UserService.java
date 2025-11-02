@@ -13,6 +13,7 @@ import com.community.domain.user.repository.UserRepository;
 import com.community.global.exception.CustomException;
 import com.community.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,13 +21,22 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class UserService {
 
+    @Value("${application.local.default_email}")
+    private String DEFAULT_IMAGE_URL;
+
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final PostService postService;
 
     public SignInResponse signIn(SignInRequest req) {
         validateDuplicateUser(req.getEmail(), req.getNickname());
-        String imageUrl = saveProfileImage(req.getFile());
+
+        MultipartFile file = req.getFile();
+        String imageUrl = DEFAULT_IMAGE_URL;
+        if (file != null && file.isEmpty()) {
+            imageUrl = fileStorageService.save(file);
+        }
+
         Long savedId = userRepository.save(new User(req.getEmail(), req.getPassword(), req.getNickname(), imageUrl));
 
         return new SignInResponse(savedId);
@@ -104,13 +114,5 @@ public class UserService {
                         throw new CustomException(ErrorCode.DUPLICATED_NICKNAME);
                     });
         }
-    }
-
-    private String saveProfileImage(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            return null;
-        }
-
-        return fileStorageService.save(file);
     }
 }
