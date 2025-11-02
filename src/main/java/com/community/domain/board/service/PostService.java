@@ -77,7 +77,6 @@ public class PostService {
             fileStorageService.delete(previousImageUrl);
         }
 
-        postRepository.save(post);
         return new PostIdResponse(post.getId());
     }
 

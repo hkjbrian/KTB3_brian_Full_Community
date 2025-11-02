@@ -80,8 +80,6 @@ public class UserService {
                 fileStorageService.delete(previousImageUrl);
             }
         }
-
-        userRepository.save(user);
     }
 
     public void changePassword(Long userId, PasswordUpdateRequest req) {
@@ -93,7 +91,6 @@ public class UserService {
         }
 
         user.updatePassword(req.getNewPassword());
-        userRepository.save(user);
     }
 
     public void deleteUser(Long userId) {
