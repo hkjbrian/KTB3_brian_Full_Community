@@ -1,46 +1,63 @@
 package com.community.domain.post.model;
 
 import com.community.domain.common.model.BaseTimeEntity;
+import com.community.domain.user.model.User;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Generated;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+@Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseTimeEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
     private Long id;
-    private final Long userId;
-    private String title;
-    private String imageUrl;
-    private String body;
-    private final AtomicLong viewCount;
 
-    public Post(Long userId, String title, String imageUrl, String body) {
-        this.userId = userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @NotBlank
+    @Size(max = 26)
+    private String title;
+
+    @Generated
+    @Size(max = 255)
+    private String imageUrl;
+
+    @NotBlank
+    @Lob
+    private String body;
+
+    private AtomicLong viewCount;
+
+    public Post(User user, String title, String imageUrl, String body) {
+        this.user = user;
         this.title = title;
         this.imageUrl = imageUrl;
         this.body = body;
         this.viewCount = new AtomicLong(0);
-        markCreated();
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public void updateTitle(String title) {
         this.title = title;
-        markUpdated();
     }
 
     public void updateImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
-        markUpdated();
     }
 
     public void updateBody(String body) {
         this.body = body;
-        markUpdated();
     }
 
     public void addViewCount() {
