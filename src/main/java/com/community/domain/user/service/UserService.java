@@ -1,7 +1,7 @@
 package com.community.domain.user.service;
 
 import com.community.domain.file.service.FileStorageService;
-import com.community.domain.post.service.PostService;
+import com.community.domain.board.service.PostService;
 import com.community.domain.user.dto.request.PasswordUpdateRequest;
 import com.community.domain.user.dto.request.SignInRequest;
 import com.community.domain.user.dto.request.UpdateRequest;

@@ -1,6 +1,6 @@
 package com.community.domain.user.repository;
 
-import com.community.domain.post.model.Post;
+import com.community.domain.board.model.Post;
 import com.community.domain.user.model.User;
 import com.community.global.exception.CustomException;
 import com.community.global.exception.ErrorCode;
