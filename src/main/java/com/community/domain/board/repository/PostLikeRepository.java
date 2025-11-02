@@ -1,14 +1,20 @@
 package com.community.domain.board.repository;
 
+import com.community.domain.board.model.PostLike;
+
+import java.util.Optional;
+
 public interface PostLikeRepository {
 
-    void save(Long postId, Long userId);
+    Long save(PostLike postLike);
 
-    void delete(Long postId, Long userId);
+    void delete(PostLike postLike);
 
     void deleteAllByPostId(Long postId);
 
-    boolean exists(Long postId, Long userId);
+    Boolean existsByPostIdAndUserId(Long postId, Long userId);
 
-    long countByPostId(Long postId);
+    Optional<PostLike> findByPostIdAndUserId(Long postId, Long userId);
+
+    Long countByPostId(Long postId);
 }
