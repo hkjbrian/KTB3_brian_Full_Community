@@ -35,11 +35,12 @@ public class JpaPostRepository implements PostRepository {
 
     @Override
     public List<Post> findAll() {
-        return em.createQuery("select p from Post p", Post.class).getResultList();
+        return em.createQuery("select p from Post p order by createdAt desc ", Post.class).getResultList();
     }
 
+    @Override
     public List<Post> findAllByUserId(Long userId) {
-        return em.createQuery("select p from Post p join fetch p.user u where u.id = :userid", Post.class).
-                setParameter("userid", userId).getResultList();
+        return em.createQuery("select p from Post p join fetch p.user u where u.id = :userId", Post.class).
+                setParameter("userId", userId).getResultList();
     }
 }
