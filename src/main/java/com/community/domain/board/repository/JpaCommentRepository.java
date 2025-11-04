@@ -48,6 +48,7 @@ public class JpaCommentRepository implements CommentRepository {
     @Override
     public void deleteByPostId(Long postId) {
         em.createQuery("delete from Comment c where c.post.id = :postId")
+                .setParameter("postId", postId)
                 .executeUpdate();
     }
 }
