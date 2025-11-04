@@ -7,6 +7,9 @@ import com.community.domain.board.model.Post;
 import com.community.domain.board.model.PostLike;
 import com.community.domain.board.repository.PostLikeRepository;
 import com.community.domain.board.repository.PostRepository;
+import com.community.domain.common.page.PageResponse;
+import com.community.domain.common.page.PageResult;
+import com.community.domain.common.page.PaginationRequest;
 import com.community.domain.file.service.FileStorageService;
 import com.community.domain.user.model.User;
 import com.community.domain.user.repository.UserRepository;
@@ -20,8 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 
-import static com.community.domain.common.util.PageUtil.paginate;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -34,14 +35,19 @@ public class PostService {
     private final CommentService commentService;
 
     @Transactional(readOnly = true)
-    public PostListResponse getPostList(int page, int size) {
-        List<Post> posts = postRepository.findAll();
-        List<Post> pagedPosts = paginate(posts, page, size);
-        List<PostSingleResponse> postList = pagedPosts.stream()
+    public PageResponse<PostSingleResponse> getPostList(PaginationRequest paginationRequest) {
+        PageResult<Post> pageResult = postRepository.findAll(paginationRequest);
+
+        List<PostSingleResponse> items = pageResult.items().stream()
                 .map(this::toSingleResponse)
                 .toList();
 
-        return new PostListResponse(postList);
+        return new PageResponse<>(
+                items,
+                pageResult.totalElements(),
+                pageResult.totalPages(),
+                paginationRequest.page(),
+                paginationRequest.size());
     }
 
     public PostSingleResponse viewPost(Long postId) {

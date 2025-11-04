@@ -1,14 +1,16 @@
 package com.community.domain.board.service;
 
-import com.community.domain.board.model.Post;
-import com.community.domain.common.util.PageUtil;
 import com.community.domain.board.dto.request.CommentRequest;
 
 import com.community.domain.board.dto.response.*;
 
 import com.community.domain.board.model.Comment;
+import com.community.domain.board.model.Post;
 import com.community.domain.board.repository.CommentRepository;
 import com.community.domain.board.repository.PostRepository;
+import com.community.domain.common.page.PageResponse;
+import com.community.domain.common.page.PageResult;
+import com.community.domain.common.page.PaginationRequest;
 import com.community.domain.user.model.User;
 import com.community.domain.user.repository.UserRepository;
 import com.community.global.exception.CustomException;
@@ -29,17 +31,21 @@ public class CommentService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public CommentListResponse getComments(Long postId, int page, int size) {
+    public PageResponse<CommentSingleResponse> getComments(Long postId, PaginationRequest paginationRequest) {
         ensurePostExists(postId);
 
-        List<Comment> comments = commentRepository.findByPostId(postId);
-        List<Comment> pagedComments = PageUtil.paginate(comments, page, size);
+        PageResult<Comment> pageResult = commentRepository.findByPostId(postId, paginationRequest);
 
-        List<CommentSingleResponse> items = pagedComments.stream()
+        List<CommentSingleResponse> items = pageResult.items().stream()
                 .map(this::toSingleResponse)
                 .toList();
 
-        return new CommentListResponse(items);
+        return new PageResponse<>(
+                items,
+                pageResult.totalElements(),
+                pageResult.totalPages(),
+                paginationRequest.page(),
+                paginationRequest.size());
     }
 
     public CommentIdResponse createComment(Long postId, Long authorId, CommentRequest request) {

@@ -3,6 +3,8 @@ package com.community.domain.board.controller;
 import com.community.domain.auth.annotation.Auth;
 import com.community.domain.auth.annotation.AuthUser;
 import com.community.domain.auth.dto.AuthenticatedUser;
+import com.community.domain.common.page.PageResponse;
+import com.community.domain.common.page.PaginationRequest;
 import com.community.domain.common.util.UriUtil;
 import com.community.domain.board.dto.request.PostCreateRequest;
 import com.community.domain.board.dto.request.PostUpdateRequest;
@@ -28,11 +30,10 @@ public class PostController implements PostApiSpec {
 
     @Override
     @GetMapping
-    public ResponseEntity<ApiResponse<PostListResponse>> getPosts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        PostListResponse response = postService.getPostList(page, size);
+    public ResponseEntity<ApiResponse<PageResponse<PostSingleResponse>>> getPosts(
+            @ModelAttribute PaginationRequest paginationRequest
+            ) {
+        PageResponse<PostSingleResponse> response = postService.getPostList(paginationRequest);
 
         return ResponseEntity
                 .ok()

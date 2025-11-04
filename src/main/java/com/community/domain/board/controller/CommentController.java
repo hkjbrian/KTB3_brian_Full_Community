@@ -3,11 +3,13 @@ package com.community.domain.board.controller;
 import com.community.domain.auth.annotation.Auth;
 import com.community.domain.auth.annotation.AuthUser;
 import com.community.domain.auth.dto.AuthenticatedUser;
-import com.community.domain.common.util.UriUtil;
 import com.community.domain.board.dto.request.CommentRequest;
 import com.community.domain.board.dto.response.CommentIdResponse;
-import com.community.domain.board.dto.response.CommentListResponse;
+import com.community.domain.board.dto.response.CommentSingleResponse;
 import com.community.domain.board.service.CommentService;
+import com.community.domain.common.page.PageResponse;
+import com.community.domain.common.page.PaginationRequest;
+import com.community.domain.common.util.UriUtil;
 import com.community.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +26,9 @@ public class CommentController implements CommentApiSpec {
 
     @Override
     @GetMapping
-    public ResponseEntity<ApiResponse<CommentListResponse>> getComments(@PathVariable Long postId,
-                                                                        @RequestParam(defaultValue = "0") int page,
-                                                                        @RequestParam(defaultValue = "10") int size) {
-        CommentListResponse res = commentService.getComments(postId, page, size);
+    public ResponseEntity<ApiResponse<PageResponse<CommentSingleResponse>>> getComments(@PathVariable Long postId,
+                                                                                        @ModelAttribute PaginationRequest pageRequest) {
+        PageResponse<CommentSingleResponse> res = commentService.getComments(postId, pageRequest);
 
         return ResponseEntity
                 .ok()

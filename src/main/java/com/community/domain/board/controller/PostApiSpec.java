@@ -5,8 +5,9 @@ import com.community.domain.board.dto.request.PostCreateRequest;
 import com.community.domain.board.dto.request.PostUpdateRequest;
 import com.community.domain.board.dto.response.PostIdResponse;
 import com.community.domain.board.dto.response.PostLikeResponse;
-import com.community.domain.board.dto.response.PostListResponse;
 import com.community.domain.board.dto.response.PostSingleResponse;
+import com.community.domain.common.page.PageResponse;
+import com.community.domain.common.page.PaginationRequest;
 import com.community.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 public interface PostApiSpec {
 
     @Operation(summary = "게시글 리스트 조회", description = "페이징 기능을 바탕으로 게시글 리스트를 조회합니다.")
-    ResponseEntity<ApiResponse<PostListResponse>> getPosts(int page, int size);
+    ResponseEntity<ApiResponse<PageResponse<PostSingleResponse>>> getPosts(PaginationRequest paginationRequest);
 
     @Operation(summary = "게시글 생성", description = "게시글을 작성하여 게시판에 등록합니다.")
     ResponseEntity<ApiResponse<PostIdResponse>> createPost(AuthenticatedUser authenticatedUser,
