@@ -58,4 +58,15 @@ public class InMemoryPostRepository implements PostRepository {
                 .filter(post -> post.getUser().getId().equals(userId))
                 .toList();
     }
+
+    @Override
+    public void increaseViewCount(Long postId, long increment) {
+        if (increment <= 0) {
+            return;
+        }
+        store.computeIfPresent(postId, (id, post) -> {
+            post.addViewCount(increment);
+            return post;
+        });
+    }
 }

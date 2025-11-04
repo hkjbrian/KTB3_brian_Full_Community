@@ -66,6 +66,17 @@ public class JpaPostRepository implements PostRepository {
                 .getResultList();
     }
 
+    @Override
+    public void increaseViewCount(Long postId, long increment) {
+        if (increment <= 0) {
+            return;
+        }
+        em.createQuery("update Post p set p.viewCount = p.viewCount + :increment where p.id = :postId")
+                .setParameter("increment", increment)
+                .setParameter("postId", postId)
+                .executeUpdate();
+    }
+
     private String resolveSortProperty(String sortBy) {
         String normalized = sortBy.trim().toLowerCase();
 

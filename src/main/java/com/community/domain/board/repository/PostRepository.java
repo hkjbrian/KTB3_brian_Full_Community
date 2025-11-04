@@ -14,5 +14,6 @@ public interface PostRepository {
     Optional<Post> findById(Long postId);
     PageResult<Post> findAll(PaginationRequest paginationRequest);
     List<Post> findAllByUserId(Long userId);
+    void increaseViewCount(Long postId, long increment);
 
 }
