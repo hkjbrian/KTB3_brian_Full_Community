@@ -68,7 +68,7 @@ public class UserService {
 
         if (req.getNickname() != null && !req.getNickname().isBlank()
                 && !req.getNickname().equals(user.getNickname())) {
-            validateDuplicateUser(null, user.getNickname());
+            validateDuplicateUser(null, req.getNickname());
             user.updateNickname(req.getNickname());
         }
 
