@@ -33,6 +33,7 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final FileStorageService fileStorageService;
     private final CommentService commentService;
+    private final PostViewEventService postViewEventService;
 
     @Transactional(readOnly = true)
     public PageResponse<PostSingleResponse> getPostList(PaginationRequest paginationRequest) {
@@ -52,7 +53,7 @@ public class PostService {
 
     public PostSingleResponse viewPost(Long postId) {
         Post post = findPost(postId);
-        post.addViewCount();
+        postViewEventService.addEvent(postId);
 
         return toSingleResponse(post);
     }
