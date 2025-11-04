@@ -46,9 +46,9 @@ public class JpaPostLikeRepository implements PostLikeRepository {
 
     @Override
     public Optional<PostLike> findByPostIdAndUserId(Long postId, Long userId) {
-        return em.createQuery("select p from PostLike p where p.post.id = :postId and p.user.id = :userid", PostLike.class)
+        return em.createQuery("select p from PostLike p where p.post.id = :postId and p.user.id = :userId", PostLike.class)
                 .setParameter("postId", postId)
-                .setParameter("userid", userId)
+                .setParameter("userId", userId)
                 .getResultStream().findFirst();
     }
 
