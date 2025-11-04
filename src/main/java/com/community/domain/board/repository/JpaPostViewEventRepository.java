@@ -29,7 +29,7 @@ public class JpaPostViewEventRepository {
                 .getResultList();
     }
 
-    public void updateEventType(Set<Long> ids) {
+    public void updateStatus(Set<Long> ids) {
         em.createQuery("update PostViewEvent e set e.status = :eventType where e.id in :ids")
                 .setParameter("eventType", PostViewEvent.Status.DONE)
                 .setParameter("ids", ids)
