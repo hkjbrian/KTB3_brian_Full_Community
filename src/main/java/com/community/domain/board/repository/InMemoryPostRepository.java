@@ -1,6 +1,9 @@
 package com.community.domain.board.repository;
 
 import com.community.domain.board.model.Post;
+import com.community.domain.common.page.PageResult;
+import com.community.domain.common.page.PaginationRequest;
+import com.community.domain.common.util.PageUtil;
 import com.community.global.exception.CustomException;
 import com.community.global.exception.ErrorCode;
 import org.springframework.stereotype.Repository;
@@ -43,10 +46,10 @@ public class InMemoryPostRepository implements PostRepository {
     }
 
     @Override
-    public List<Post> findAll() {
+    public PageResult<Post> findAll(PaginationRequest paginationRequest) {
         List<Post> posts = new ArrayList<>(store.values());
-        posts.sort(Comparator.comparing(Post::getId, Comparator.reverseOrder()));
-        return posts;
+
+        return PageUtil.paginate(posts, paginationRequest);
     }
 
     @Override

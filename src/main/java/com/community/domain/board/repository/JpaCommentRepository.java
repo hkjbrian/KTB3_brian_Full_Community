@@ -1,6 +1,9 @@
 package com.community.domain.board.repository;
 
 import com.community.domain.board.model.Comment;
+import com.community.domain.common.page.PageResult;
+import com.community.domain.common.page.PaginationRequest;
+import com.community.domain.common.util.PageUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.context.annotation.Primary;
@@ -34,9 +37,28 @@ public class JpaCommentRepository implements CommentRepository {
     }
 
     @Override
-    public List<Comment> findByPostId(Long postId) {
-        return em.createQuery("select c from Comment c where c.post.id = :postId", Comment.class)
-                .setParameter("postId", postId).getResultList();
+    public PageResult<Comment> findByPostId(Long postId, PaginationRequest paginationRequest) {
+        int page = paginationRequest.page();
+        int size = paginationRequest.size();
+        int offset = page * size;
+
+        String sortProperty = paginationRequest.sortBy();
+        String direction = PageUtil.resolveDirection(paginationRequest.direction());
+
+        String query = "select c from Comment c where c.post.id =:postId order by c." + sortProperty + " " + direction;
+        List<Comment> comments = em.createQuery(query, Comment.class)
+                .setParameter("postId", postId)
+                .setFirstResult(offset)
+                .setMaxResults(size)
+                .getResultList();
+
+        Long totalElements = em.createQuery("select count(c) from Comment c where c.post.id = :postId", Long.class)
+                .setParameter("postId", postId)
+                .getSingleResult();
+
+        int totalPages = PageUtil.calculateTotalPages(totalElements, size);
+
+        return new PageResult<>(comments, totalElements, totalPages);
     }
 
     @Override

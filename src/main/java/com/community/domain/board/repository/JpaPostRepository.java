@@ -1,6 +1,9 @@
 package com.community.domain.board.repository;
 
 import com.community.domain.board.model.Post;
+import com.community.domain.common.page.PageResult;
+import com.community.domain.common.page.PaginationRequest;
+import com.community.domain.common.util.PageUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.context.annotation.Primary;
@@ -34,13 +37,43 @@ public class JpaPostRepository implements PostRepository {
     }
 
     @Override
-    public List<Post> findAll() {
-        return em.createQuery("select p from Post p order by createdAt desc ", Post.class).getResultList();
+    public PageResult<Post> findAll(PaginationRequest paginationRequest) {
+        int page = paginationRequest.page();
+        int size = paginationRequest.size();
+        int offset = page * size;
+
+        String sortProperty = resolveSortProperty(paginationRequest.sortBy());
+        String direction = PageUtil.resolveDirection(paginationRequest.direction());
+
+        String query = "select p from Post p order by p." + sortProperty + " " + direction;
+        List<Post> posts = em.createQuery(query, Post.class)
+                .setFirstResult(offset)
+                .setMaxResults(size)
+                .getResultList();
+
+        Long totalElements = em.createQuery("select count(p) from Post p", Long.class)
+                .getSingleResult();
+
+        int totalPages = PageUtil.calculateTotalPages(totalElements, size);
+
+        return new PageResult<>(posts, totalElements, totalPages);
     }
 
     @Override
     public List<Post> findAllByUserId(Long userId) {
-        return em.createQuery("select p from Post p join fetch p.user u where u.id = :userId", Post.class).
-                setParameter("userId", userId).getResultList();
+        return em.createQuery("select p from Post p join fetch p.user u where u.id = :userId order by p.createdAt desc", Post.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
+
+    private String resolveSortProperty(String sortBy) {
+        String normalized = sortBy.trim().toLowerCase();
+
+        return switch (normalized) {
+            case "viewcount" -> "viewCount";
+            case "title" -> "title";
+            case "createdat" -> "createdAt";
+            default -> "createdAt";
+        };
     }
 }

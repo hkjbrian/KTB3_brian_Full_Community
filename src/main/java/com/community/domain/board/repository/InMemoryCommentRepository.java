@@ -2,6 +2,9 @@ package com.community.domain.board.repository;
 
 import com.community.domain.board.model.Comment;
 import com.community.domain.board.model.Post;
+import com.community.domain.common.page.PageResult;
+import com.community.domain.common.page.PaginationRequest;
+import com.community.domain.common.util.PageUtil;
 import com.community.global.exception.CustomException;
 import com.community.global.exception.ErrorCode;
 import org.springframework.stereotype.Repository;
@@ -44,11 +47,13 @@ public class InMemoryCommentRepository implements CommentRepository {
     }
 
     @Override
-    public List<Comment> findByPostId(Long postId) {
+    public PageResult<Comment> findByPostId(Long postId, PaginationRequest paginationRequest) {
 
-        return store.values().stream()
+        List<Comment> source = store.values().stream()
                 .filter(comment -> Objects.equals(comment.getPost().getId(), postId))
                 .toList();
+
+        return PageUtil.paginate(source, paginationRequest);
     }
 
     @Override
