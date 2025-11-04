@@ -58,7 +58,17 @@ public class Post extends BaseTimeEntity {
     }
 
     public void addViewCount() {
-        this.viewCount += 1;
+        addViewCount(1);
+    }
+
+    public void addViewCount(long increment) {
+        if (increment <= 0) {
+            return;
+        }
+        if (this.viewCount == null) {
+            this.viewCount = 0L;
+        }
+        this.viewCount += increment;
     }
 
     public long getViewCount() {
